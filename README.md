@@ -31,8 +31,8 @@ The following software is required to build this tutorial.
         - Includes Azure Functions and Azure Storage extensions
 * [http-server](https://www.npmjs.com/package/http-server)
     * For running frontend web app locally
-    * With Node installed, run the command `npm install http-server -g`
-* [Postman](https://www.getpostman.com/) (optional, for testing Azure Functions)
+    * Install using the command `npm install http-server -g`
+* [Postman](https://www.getpostman.com/) (optional, for testing HTTP Azure Functions)
 
 ---
 
@@ -64,12 +64,14 @@ You will build and test the Azure Functions app locally. The app will access som
     | Geo-redundancy | Disable |
     | Multi-region writes | Disable |
     
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/create-cosmosdb-screenshot.png)
+    ![](media/create-cosmosdb.png)
 
 1. Click **Review and create**, then **Create**.
 
 
 ### Create a Storage account
+
+While the Cosmos DB account is creating, create a Storage account.
 
 1. Click on the **Create a resource** (**+**) button for creating a new Azure resource.
 
@@ -90,8 +92,12 @@ You will build and test the Azure Functions app locally. The app will access som
     
 1. Click **Review and create**, then **Create**.
 
+    ![](media/create-storage.png)
+
 
 ### Create an Azure SignalR Service instance
+
+While the other resources are creating, create a SignalR Service instance.
 
 1. Click on the **Create a resource** (**+**) button for creating a new Azure resource.
 
@@ -107,7 +113,9 @@ You will build and test the Azure Functions app locally. The app will access som
     | Location | Select a location close to you |
     | Pricing Tier | Free |
 
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/create-signalr-screenshot.png)
+    ![](media/create-signalrservice-1.png)
+
+    ![](media/create-signalrservice-2.png)
     
 1. Click **Create**.
 
@@ -116,7 +124,10 @@ You will build and test the Azure Functions app locally. The app will access som
 
 Before creating the application, you will initialize the Cosmos DB account with a database and a collection. You will also seed it with some data.
 
-1. In the Azure portal, open the Cosmos DB account that you created.
+1. When the Cosmos DB account has been created, open it in the Azure portal.
+    > One way to locate resources in the Azure portal is to search for it with the search bar.
+    >
+    > ![](media/find-cosmosdb.png)
 
 1. Select **Data Explorer**, create a database and collection.
     1. Click **New Collection**.
@@ -125,6 +136,8 @@ Before creating the application, you will initialize the Cosmos DB account with 
     1. In **Collection id**, enter **flights**.
     1. Enter a partition key of **/id**.
     1. Click **OK** to create the database.
+
+    ![](media/create-cosmosdb-collection.png)
 
 1. In the Data Explorer, navigate to the newly created **flights** collection.
 
@@ -143,6 +156,9 @@ Before creating the application, you will initialize the Cosmos DB account with 
 
 1. Click **Save** to create the document in the collection.
 
+    ![](media/create-cosmosdb-document.png)
+
+
 ---
 
 
@@ -157,15 +173,13 @@ Later on in the tutorial, you will deploy the function app to Azure.
 
 1. In a new VS Code window, use `File > Open Folder` in the menu to create and open an empty folder in an appropriate location. This will be the main project folder for the application that you will build.
 
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/vscode-new-folder-screenshot.png)
-
 1. Using the Azure Functions extension in VS Code, initialize a Function app in the main project folder.
     1. Open the Command Palette in VS Code by selecting `View > Command Palette` from the menu (shortcut `Ctrl-Shift-P`, macOS: `Cmd-Shift-P`).
     1. Search for the "Azure Functions: Create New Project" command and select it.
     1. The main project folder should appear. Select it (or use "Browse" to locate it).
     1. In the prompt to choose a language, select **JavaScript**.
 
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/vscode-new-function-project-screenshot.png)
+    ![](media/new-function-app.png)
 
 
 
@@ -173,7 +187,7 @@ Later on in the tutorial, you will deploy the function app to Azure.
 
 This tutorial uses Azure Functions bindings to interact with Azure Cosmos DB and Azure SignalR Service. These bindings are available as extensions that need to be installed using the Azure Functions Core Tools CLI before they can be used.
 
-1. Open a terminal in VS Code by selecting `View > Integrated Terminal` from the menu (Ctrl-`).
+1. Open a terminal in VS Code by selecting `View > Terminal` from the menu (Ctrl-`).
 
 1. Ensure the main project folder is the current directory.
 
@@ -187,7 +201,7 @@ This tutorial uses Azure Functions bindings to interact with Azure Cosmos DB and
     func extensions install -p Microsoft.Azure.WebJobs.Extensions.SignalRService -v 1.0.0-preview1-10025
     ```
 
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/vscode-install-func-extensions-screenshot.png)
+    ![](media/add-functions-extensions.png)
 
 
 ### Configure application settings
@@ -206,7 +220,6 @@ When running and debugging the Azure Functions runtime locally, application sett
         "AzureWebJobsStorage": "<storage-connection-string>",
         "AzureSignalRConnectionString": "<signalr-connection-string>",
         "AzureWebJobsCosmosDBConnectionString": "<cosmosdb-connection-string>",
-        "WEBSITE_NODE_DEFAULT_VERSION": "10.6.0",
         "FUNCTIONS_WORKER_RUNTIME": "node"
       },
       "Host": {
@@ -217,15 +230,14 @@ When running and debugging the Azure Functions runtime locally, application sett
     }
     ```
 
-    * Enter the Azure Storage account connection string into a setting named `AzureWebJobsStorage`. Obtain the value from the **Keys** page in the Storage account in the Azure portal; either than primary or secondary connection string can be used. This setting is required by Azure Functions runtime to coordinate execution between multiple function app instances.
-    * Enter the Azure SignalR Service connection string into a setting named `AzureSignalRConnectionString`. Obtain the value from the **Keys** page in the Azure SignalR Service resource in the Azure portal; either than primary or secondary connection string can be used.
-    * Enter the Azure Cosmos DB connection string into a setting named `CosmosDBConnectionString`. Obtain the value from the **Keys** page in the Cosmos DB account in the Azure portal; either than primary or secondary connection string can be used.
-    * The `WEBSITE_NODE_DEFAULT_VERSION` setting is not used locally, but is required when deployed to Azure.
+    * Enter the Azure Storage account connection string into a setting named `AzureWebJobsStorage`. Obtain the value from the **Keys** page in the Storage account in the Azure portal; either the primary or secondary connection string can be used. This setting is required by Azure Functions runtime to coordinate executions between multiple function app instances.
+    * Enter the Azure SignalR Service connection string into a setting named `AzureSignalRConnectionString`. Obtain the value from the **Keys** page in the Azure SignalR Service resource in the Azure portal; either the primary or secondary connection string can be used.
+    * Enter the Azure Cosmos DB connection string into a setting named `CosmosDBConnectionString`. Obtain the value from the **Keys** page in the Cosmos DB account in the Azure portal; either the primary or secondary connection string can be used.
     * The `Host` section configures the port and CORS settings for the local Functions host.
 
 1. Save the file.
 
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/vscode-localsettings-screenshot.png)
+    ![](media/update-local-settings.png)
 
 ---
 
@@ -296,7 +308,7 @@ When running and debugging the Azure Functions runtime locally, application sett
 
 1. To run the function app locally, press **F5** in VS Code. If this is the first time, the Azure Functions host will start in the VS Code integrated terminal.
 
-1. When the functions runtime is successfully started, the terminal output will display a URL for the local **CreateMessage** endpoint (by default, it is `http://localhost:7071/api/GetFlights`).
+1. When the functions runtime is successfully started, the terminal output will display a URL for the local **GetFlights** endpoint (by default, it is `http://localhost:7071/api/GetFlights`).
 
 1. Open Postman. Postman is an application to send HTTP requests.
 
@@ -308,7 +320,7 @@ When running and debugging the Azure Functions runtime locally, application sett
     ```
     This loads a collection of HTTP requests for testing the function app locally. Click on the **Collections** tab in Postman to see it.
 
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/postman-import-screenshot.png)
+    ![](media/postman-import-screenshot.png)
 
 1. In the **Serverless flights** collection, select the **Get flights** request.
 
@@ -316,17 +328,7 @@ When running and debugging the Azure Functions runtime locally, application sett
 
 1. Click **Send**. The function app should return an HTTP status of 200. The body should contain the flight(s) data you added to Cosmos DB earlier.
 
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/postman-test-createmessage-screenshot.png)
-
-1. In the Azure portal, open the Cosmos DB account resource you created earlier.
-
-1. Using the Cosmos DB Data Explorer, locate the **messages** collection in the **chat** database. The message sent from Postman should appear as a document in the collection.
-
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/cosmosdb-data-explorer-screenshot.png)
-
 1. Click the **Disconnect** button to stop the function host and stop debugging.
-
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/vscode-disconnect-functions-debug-screenshot.png)
 
 
 ## Create and run the frontend single page application
@@ -350,6 +352,8 @@ The flight application's UI is a simple single page application (SPA) created wi
     > If you are using a different web server or http-server uses a different port, you may need to update your `CORS` entry in **local.settings.json** and restart the function app.
 
 1. Open a browser and navigate to **http://localhost:8080/**. The app should appear and populated with the correct data from Cosmos DB.
+
+    ![](media/app-screenshot-1.png)
 
 Next, you will integrate Azure SignalR Service into your application to allow any changes in data to appear in real-time.
 
@@ -411,8 +415,8 @@ The single page application uses the SignalR client SDK to connect to SignalR Se
 1. Open **negotiate/index.js** to view the body of the function. Modify the content of the file to the following.
 
     ```javascript
-    module.exports = async function (context, connectionInfo) {
-        context.res.body = connectionInfo;
+    module.exports = async function (context, req, connectionInfo) {
+      context.res.body = connectionInfo;
     };
     ```
 
@@ -454,7 +458,6 @@ The single page application uses the SignalR client SDK to connect to SignalR Se
     | Collection name | flights |
     | Collection name for leases | leases |
     | Create lease collection of not exists | true |
-    | Authorization level | Anonymous |
     
     A folder named **CosmosTrigger** is created that contains the new function.
 
@@ -483,7 +486,7 @@ The single page application uses the SignalR client SDK to connect to SignalR Se
     }
     ```
 
-    This adds the a SignalR output binding to the function that will be used to send updates to SignalR Service.
+    This adds the a SignalR output binding to the function that will be used to send updates to SignalR Service. It also increases the frequency that the function app polls for changes in Cosmos DB from the default 5 seconds to 1 second (1000ms).
 
 1. Open **CosmosTrigger/index.js** to view the body of the function. Modify the content of the file to the following.
 
@@ -545,7 +548,6 @@ You have been running the function app and the frontend locally. You will now de
     | Function app name | Enter a unique name |
     | Resource group | Select the same resource group as your other resources in this tutorial |
     | Storage account | Select the account you created earlier |
-    | Location | Select a location close to you |
     
     A new function app is created in Azure and the deployment begins. The Azure Functions VS Code extension will first create the Azure resources; then it will deploy the function app. Wait for deployment to complete.
 
@@ -566,8 +568,6 @@ You have been running the function app and the frontend locally. You will now de
     | Function app name | Enter a unique name |
 
 Local settings are uploaded to the function app in Azure. If prompted to overwrite existing settings, select **Yes to all**.
-
-![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/vscode-update-function-settings-screenshot.png)
 
 
 
@@ -604,10 +604,9 @@ Although there is a CORS setting in **local.settings.json**, it is not propagate
 
 1. Under the **Platform features** tab, select **CORS**.
 
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/functions-platform-features-screenshot.png)
+1. Add an entry with the static website **primary endpoint** as the value (remove the trailing `/`).
 
-
-1. Add an entry with the static website **primary endpoint** as the value.
+    ![](media/cors-settings.png)
 
 1. Click **Save** to persist the CORS settings.
 
@@ -625,6 +624,8 @@ Currently, this feature can only be enabled using the Azure command line interfa
     az resource update --resource-group <resource_group_name> --parent sites/<function_app_name> --name web --namespace Microsoft.Web --resource-type config --set properties.cors.supportCredentials=true --api-version 2015-06-01
     ```
 
+    ![](media/cloud-shell.png)
+
 1. Once completed, CORS credentials support is enabled in the function app.
 
 > Note: There is currently a bug in the Azure portal, where updating the CORS origins like you did in the previous step will disable CORS credentials support. Rerun the above command if this happens. A fix is rolling out in late January.
@@ -636,13 +637,13 @@ Currently, this feature can only be enabled using the Azure command line interfa
 
 1. Copy the function app's URL.
 
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/functions-get-url-screenshot.png)
+    ![](media/function-app-url.png)
 
-1. In VS Code, open **index.html** and replace the value of `window.apiBaseUrl` with the function app's URL.
+1. In VS Code, open **index.html** and replace the value of `apiBaseUrl` with the function app's URL.
 
 1. Save the file.
 
-    ![](https://github.com/Azure-Samples/functions-serverless-chat-app-tutorial/raw/master/media/vscode-paste-function-url-screenshot.png)
+    ![](media/update-url.png)
 
 
 ### Deploy frontend to Storage
@@ -653,7 +654,15 @@ Currently, this feature can only be enabled using the Azure command line interfa
 
 1. Select the subscription and Storage account.
 
-1. When prompted for a folder, select **content**.
+1. When prompted for a folder, select **browse** and choose the **content** folder containing index.html.
+
+1. A notification should appear that the upload was successful. Click the button to open the app in a browser.
+
+1. Change the document to Cosmos DB or add a new document (use the same schema as the first document), the update should appear in the browser.
+
+1. Congratulations, you've deployed a serverless real-time web application to Azure!
 
 
-...
+
+---
+

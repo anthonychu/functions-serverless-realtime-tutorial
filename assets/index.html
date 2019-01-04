@@ -1,0 +1,223 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous">
+  <title>Cosmos DB Change Feed</title>
+  <style>
+    .fade-enter-active {
+    transition: all 1.5s ease;
+  }
+  .fade-enter, .fade-leave-to {
+    opacity: 0;
+  }
+
+  .modal-mask {
+    position: fixed;
+    z-index: 9998;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .5);
+    display: table;
+    transition: opacity .3s ease;
+  }
+
+  .modal-wrapper {
+    display: table-cell;
+    vertical-align: middle;
+  }
+
+  .can-edit .card {
+    cursor: pointer;
+  }
+
+  .fa-edit {
+    color: #aaaaaa;
+  }
+  </style>
+</head>
+
+<body>
+  <div class="container" id="app" :class="{ 'can-edit': canEdit }">
+    <div class="row">
+      <div>
+        <h1>Real-time flight prices</h1>
+        <div v-if="isAuthEnabled">
+          <div v-if="canEdit">
+            Welcome {{ username }} | 
+            <a href="#" @click.prevent="beginEditFlight({})">New flight</a> |
+            <a :href="logoutUrl">Logout</a>
+          </div>
+          <div v-else>
+            <a :href="loginUrl">Login to edit</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div v-for="flight in flights" class="col-md-6 col-lg-4 col-xl-3" style="margin: 16px 0px;">
+        <div class="card" v-on:click="beginEditFlight(flight)">
+          <div class="card-body">
+            <h4 class="card-title">{{ flight.from }} <i class="fas fa-plane"></i> {{ flight.to }} <small><i v-if="canEdit" class="far fa-edit"></i></small></h4>
+            <transition name="fade" mode="out-in">
+              <h4 class="card-subtitle mb-2" :key="flight.price">${{ flight.price }}</h4>
+            </transition>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="isModalVisible">
+      <transition name="modal">
+        <div class="modal-mask">
+          <div class="modal-wrapper">
+
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">
+                    <span v-if="selectedFlight.id">Edit</span>
+                    <span v-else>New</span>
+                    flight</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" @click="isModalVisible=false">&times;</span>
+                  </button>
+                </div>
+                <form @submit.prevent="updateFlight">
+                  <div class="modal-body">
+                    <div class="form-group">
+                      <label for="editFrom">From airport</label>
+                      <input type="text" class="form-control" required pattern="[A-Z]{3,4}" title="Airport code (3-4 upper case letters)" id="editFrom" v-model="selectedFlight.from">
+                    </div>
+                    <div class="form-group">
+                      <label for="editTo">To airport</label>
+                      <input type="text" class="form-control" required pattern="[A-Z]{3,4}" title="Airport code (3-4 upper case letters)" id="editTo" v-model="selectedFlight.to">
+                    </div>
+                    <div class="form-group">
+                      <label for="editPrice">Price</label>
+                      <input type="text" class="form-control" required pattern="[1-9]\d{0,4}" title="1 - 99999" id="editPrice" v-model="selectedFlight.price">
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @click="isModalVisible=false">Close</button>
+                    <input type="submit" class="btn btn-primary" value="Save">
+                  </div>
+                </form>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </transition>
+    </div>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.5.21/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@aspnet/signalr@1.1.0/dist/browser/signalr.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@0.18.0/dist/axios.min.js"></script>
+  <script>
+    const apiBaseUrl = 'http://localhost:7071'
+    const authProvider = 'twitter'
+    const data = {
+      flights: [],
+      selectedFlight: {
+        id: null,
+        from: null,
+        to: null,
+        price: null
+      },
+      isModalVisible: false,
+      isAuthEnabled: false,
+      loginUrl: `${apiBaseUrl}/.auth/login/${authProvider}?post_login_redirect_url=${encodeURIComponent(window.location.href)}`,
+      logoutUrl: `${apiBaseUrl}/.auth/logout?post_logout_redirect_uri=${encodeURIComponent(window.location.href)}`,
+      username: null
+    }
+    const app = new Vue({
+      el: '#app',
+      data: data,
+      computed: {
+        canEdit: function() {
+          return !!this.username
+        }
+      },
+      methods: {
+        beginEditFlight: function (flight) {
+          if (!this.canEdit) return;
+
+          this.selectedFlight.id = flight.id
+          this.selectedFlight.from = flight.from
+          this.selectedFlight.to = flight.to
+          this.selectedFlight.price = flight.price
+          this.isModalVisible = true
+        },
+        updateFlight: function () {
+          const config = { withCredentials: true }
+          this.isModalVisible = false
+          return axios.post(`${apiBaseUrl}/api/UpdateFlight`, this.selectedFlight, config)
+        }
+      }
+    })
+
+    getUserInfo()
+
+    getFlights().then(function (flights) {
+      flights.forEach(flightUpdated)
+    }).then(function () {
+      const connection = new signalR.HubConnectionBuilder()
+        .withUrl(`${apiBaseUrl}/api`)
+        .build()
+
+      connection.on('flightUpdated', flightUpdated)
+
+      connection.onclose(function () {
+        console.log('disconnected')
+        setTimeout(function () { startConnection(connection) }, 2000)
+      })
+
+      connection.start()
+        .then(function () { console.log('connected!') })
+
+    }).catch(console.error)
+
+    function getFlights() {
+      return axios.post(`${apiBaseUrl}/api/GetFlights`)
+        .then(function (resp) { return resp.data })
+        .catch(function () { return {} })
+    }
+
+    function flightUpdated(updatedFlight) {
+      const flight = data.flights.find(f => f.id === updatedFlight.id)
+      if (flight) {
+        Vue.set(flight, 'from', updatedFlight.from)
+        Vue.set(flight, 'to', updatedFlight.to)
+        Vue.set(flight, 'price', updatedFlight.price)
+      } else {
+        data.flights.push(updatedFlight)
+      }
+    }
+
+    function getUserInfo() {
+      const config = { withCredentials: true }
+      return axios.get(`${apiBaseUrl}/.auth/me`, config).then(function(resp) {
+        data.isAuthEnabled = true
+        const identity = resp.data[0]
+        data.username = identity.user_id
+        console.log(resp)
+      }).catch(function(err) {
+        // 401 - auth enabled but not authenticated
+        // 404 - auth disabled
+        data.isAuthEnabled = err.response.status === 401
+      });
+    }
+  </script>
+</body>
+
+</html>
