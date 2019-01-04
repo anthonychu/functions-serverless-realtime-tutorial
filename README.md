@@ -663,6 +663,112 @@ Currently, this feature can only be enabled using the Azure command line interfa
 1. Congratulations, you've deployed a serverless real-time web application to Azure!
 
 
-
 ---
+
+## Add Authentication
+
+Azure Functions has built-in authentication, supporting popular providers such as Facebook, Twitter, Microsoft Account, Google, and Azure Active Directory. You will now add authentication to your application and allow authenticated users to update or create flights.
+
+### Create the UpdateFlight function
+
+1. Open the VS Code command palette (`Ctrl-Shift-P`, macOS: `Cmd-Shift-P`).
+
+1. Search for and select the **Azure Functions: Create Function** command.
+
+1. When prompted, provide the following information.
+
+    | Name | Value |
+    |---|---|
+    | Function app folder | select the main project folder |
+    | Template | HTTP Trigger |
+    | Name | UpdateFlight |
+    | Authorization level | Anonymous |
+    
+    A folder named **UpdateFlight** is created that contains the new function.
+
+1. Open **UpdateFlight/function.json** to configure bindings for the function. Modify the content of the file to the following. This restricts the function to only POST requests, and adds a Cosmos DB output binding that takes care of updating and creating documents in the specified Cosmos DB collection.
+    ```json
+    {
+      "disabled": false,
+      "bindings": [
+        {
+          "authLevel": "anonymous",
+          "type": "httpTrigger",
+          "direction": "in",
+          "name": "req",
+          "methods": [ "post" ]
+        },
+        {
+          "type": "http",
+          "direction": "out",
+          "name": "res"
+        },
+        {
+          "name": "flight",
+          "type": "cosmosDB",
+          "databaseName": "flightsdb",
+          "collectionName": "flights",
+          "createIfNotExists": true,
+          "connectionStringSetting": "AzureWebJobsCosmosDBConnectionString",
+          "direction": "out"
+        }
+      ]
+    }
+    ```
+
+1. Open **UpdateFlight/index.js** to view the body of the function. Modify the content of the file to the following.
+
+    ```javascript
+    module.exports = async function (context, req) {
+        const isAuthEnabled = process.env.WEBSITE_AUTH_ENABLED;
+        const username = req.headers['x-ms-client-principal-name'];
+        if (!isAuthEnabled || !username) {
+            context.res = { status: 403, statusText: 'Forbidden' };
+            return;
+        }
+    
+        const flight = req.body;
+        flight.username = username;
+        context.bindings.flight = flight;
+    };
+    ```
+
+    This function first ensures that authentication is enabled and that the user is authenticated. Then it takes the request body, adds the username, and saves it to Cosmos DB using the output binding named `flight`.
+
+    > Note that local testing of functions authentication is coming soon. Until then, you will test this function in Azure.
+
+
+### Deploy the updated function
+
+1. Open the VS Code command palette (`Ctrl-Shift-P`, macOS: `Cmd-Shift-P`).
+
+1. Search for and select the **Azure Functions: Deploy to Function App** command.
+
+1. When prompted, select the subscription and function app that you deployed earlier.
+    
+1. Wait for the app to finish deployment.
+
+
+### Enable authentication in the function app
+
+The following steps detail adding Azure Active Directory authentication to your function app. If you prefer to use other OAuth providers such as Facebook or Twitter, consult the [Azure App Service Authentication documentation](https://docs.microsoft.com/azure/app-service/configure-authentication-provider-facebook).
+
+1. In the Azure portal, open your function app.
+
+1. Click on the **Platform Features** tab. Select **Authentication/Authorization**.
+
+1. Select **On** to turn on App Service Authentication.
+
+1. Under **Action to take when request is not authenticated**, select **Allow Anonymous requests (no action)**. This enables authentication, but does not require a request to be authenticated to call a function.
+
+1. Select **Azure Active Directory** to configure authentication using Azure Active Directory (AAD).
+    1. Select **Express** management mode to have Azure automatically configure authentication with AAD.
+    1. Ensure the second management mode is set to **Create new AD app** and an app name is entered.
+    1. Click **OK**.
+    ![](media/configure-aad-1.png)
+
+1. Add the Storage static website **primary endpoint** to the list of allowed external redirect URLs.
+    ![](media/configure-aad-2.png)
+
+1. Click **Save** and authentication will be configured.
 
