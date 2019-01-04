@@ -15,7 +15,7 @@ In this tutorial, you'll be building a serverless web app for displaying airline
     - Store flight prices
     - Trigger Azure Functions when data changes
 * [Azure SignalR Service](https://azure.microsoft.com/services/signalr-service/?WT.mc_id=serverlesschatlab-tutorial-antchu)
-    - Broadcast flight price updates to connected chat clients
+    - Broadcast flight price updates to connected browsers using technologies such as WebSocket
 
 ### Prerequisites
 
