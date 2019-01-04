@@ -310,23 +310,8 @@ When running and debugging the Azure Functions runtime locally, application sett
 
 1. When the functions runtime is successfully started, the terminal output will display a URL for the local **GetFlights** endpoint (by default, it is `http://localhost:7071/api/GetFlights`).
 
-1. Open Postman. Postman is an application to send HTTP requests.
-
-1. Select `File > Import` from the menu.
-
-1. Choose **Import from link** and paste in
-    ```
-    https://raw.githubusercontent.com/Azure-Samples/functions-serverless-chat-app-tutorial/master/requests/SignalRChat.postman_collection.json
-    ```
-    This loads a collection of HTTP requests for testing the function app locally. Click on the **Collections** tab in Postman to see it.
-
-    ![](media/postman-import-screenshot.png)
-
-1. In the **Serverless flights** collection, select the **Get flights** request.
-
-1. Confirm the URL matches the one outputted by the function host and there is JSON message in the request body.
-
-1. Click **Send**. The function app should return an HTTP status of 200. The body should contain the flight(s) data you added to Cosmos DB earlier.
+1. Use Postman or your browser to issue a GET request to `http://localhost:7071/api/GetFlights`. It should return the document(s) you created earlier.
+    > Note that Azure Functions automatically negotiates the response content type based on request headers. Some browsers are configured to receive responses in XML instead of JSON.
 
 1. Click the **Disconnect** button to stop the function host and stop debugging.
 
@@ -429,11 +414,8 @@ The single page application uses the SignalR client SDK to connect to SignalR Se
 
 1. When the functions runtime is successfully started, the terminal output will display URLs for the local endpoints, including **negotiate** (by default, it is `http://localhost:7071/api/negotiate`).
 
-1. (See above to open Postman and import a collection) In Postman, in the **Serverless flights** collection, select the **Get SignalR negotiate** request.
-
-1. Confirm the URL matches the one outputted by the function host and the HTTP method is **GET**.
-
-1. Click **Send**. The function app should return connection information for SignalR Service.
+1. Use Postman or your browser to issue a GET request to `http://localhost:7071/api/negotiate`. It should return an endpoint and an access token that the SignalR JavaScript SDK will use to connect to SignalR Service.
+    > Note that Azure Functions automatically negotiates the response content type based on request headers. Some browsers are configured to receive responses in XML instead of JSON.
 
 1. Press the **Disconnect** button to disconnect the debugger from the function host.
 
