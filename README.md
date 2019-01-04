@@ -777,3 +777,8 @@ Azure Functions has built-in authentication, supporting popular providers such a
 
 1. The application should now display a login link. After you log in, you'll be able to update prices and add new flights. Changes you make will be reflected in all browsers that have the app open, in real-time.
 
+
+## Summary
+
+Congratulations! You have successfully built a serverless web app that is hosted on Azure Storage static websites and uses a backend running on Azure Functions. The application stores data in Azure Cosmos DB, and uses the Cosmos DB change feed in combination with Azure SignalR Service to update data in browsers via WebSocket. Finally, you added authentication to the app.
+
