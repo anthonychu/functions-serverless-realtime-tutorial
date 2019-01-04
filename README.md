@@ -219,7 +219,7 @@ When running and debugging the Azure Functions runtime locally, application sett
       "Values": {
         "AzureWebJobsStorage": "<storage-connection-string>",
         "AzureSignalRConnectionString": "<signalr-connection-string>",
-        "AzureWebJobsCosmosDBConnectionString": "<cosmosdb-connection-string>",
+        "AzureCosmosDBConnectionString": "<cosmosdb-connection-string>",
         "FUNCTIONS_WORKER_RUNTIME": "node"
       },
       "Host": {
@@ -281,7 +281,7 @@ When running and debugging the Azure Functions runtime locally, application sett
         {
           "type": "cosmosDB",
           "name": "flights",
-          "ConnectionStringSetting": "AzureWebJobsCosmosDBConnectionString",
+          "ConnectionStringSetting": "AzureCosmosDBConnectionString",
           "databaseName": "flightsdb",
           "collectionName": "flights",
           "direction": "in"
@@ -289,7 +289,7 @@ When running and debugging the Azure Functions runtime locally, application sett
       ]
     }
     ```
-    This adds a Cosmos DB input binding that retrieves documents from a collection named `flights` from a database named `flightsdb`. `AzureWebJobsCosmosDBConnectionString` is the name of the application setting that you configured earlier that contains the connection string to Cosmos DB.
+    This adds a Cosmos DB input binding that retrieves documents from a collection named `flights` from a database named `flightsdb`. `AzureCosmosDBConnectionString` is the name of the application setting that you configured earlier that contains the connection string to Cosmos DB.
 
 1. Save the file.
 
@@ -435,7 +435,7 @@ The single page application uses the SignalR client SDK to connect to SignalR Se
     | Function app folder | select the main project folder |
     | Template | Azure Cosmos DB Trigger |
     | Name | CosmosTrigger |
-    | App setting for your account Cosmos DB account | AzureWebJobsCosmosDBConnectionString |
+    | App setting for your account Cosmos DB account | AzureCosmosDBConnectionString |
     | Database name | flightsdb |
     | Collection name | flights |
     | Collection name for leases | leases |
@@ -455,7 +455,7 @@ The single page application uses the SignalR client SDK to connect to SignalR Se
           "databaseName": "flightsdb",
           "collectionName": "flights",
           "createLeaseCollectionIfNotExists": true,
-          "ConnectionStringSetting": "AzureWebJobsCosmosDBConnectionString",
+          "ConnectionStringSetting": "AzureCosmosDBConnectionString",
           "feedPollDelay": 1000
         },
         {
@@ -691,7 +691,7 @@ Azure Functions has built-in authentication, supporting popular providers such a
           "databaseName": "flightsdb",
           "collectionName": "flights",
           "createIfNotExists": true,
-          "connectionStringSetting": "AzureWebJobsCosmosDBConnectionString",
+          "connectionStringSetting": "AzureCosmosDBConnectionString",
           "direction": "out"
         }
       ]
