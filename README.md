@@ -751,8 +751,6 @@ Azure Functions has built-in authentication, supporting popular providers such a
 
 ### Enable authentication in the function app
 
-The following steps detail adding Azure Active Directory authentication to your function app. If you prefer to use other OAuth providers such as Facebook or Twitter, consult the [Azure App Service Authentication documentation](https://docs.microsoft.com/azure/app-service/configure-authentication-provider-facebook).
-
 1. In the Azure portal, open your function app.
 
 1. Click on the **Platform Features** tab. Select **Authentication/Authorization**.
@@ -761,14 +759,39 @@ The following steps detail adding Azure Active Directory authentication to your 
 
 1. Under **Action to take when request is not authenticated**, select **Allow Anonymous requests (no action)**. This enables authentication, but does not require a request to be authenticated to call a function.
 
-1. Select **Azure Active Directory** to configure authentication using Azure Active Directory (AAD).
-    1. Select **Express** management mode to have Azure automatically configure authentication with AAD.
-    1. Ensure the second management mode is set to **Create new AD app** and an app name is entered.
-    1. Click **OK**.
-    ![](media/configure-aad-1.png)
+1. Follow the instructions for the authentication provider you'd like to use.
+    - [Facebook](https://docs.microsoft.com/azure/app-service/configure-authentication-provider-facebook)
+    - [Twitter](https://docs.microsoft.com/azure/app-service/configure-authentication-provider-twitter)
+    - [Google](https://docs.microsoft.com/azure/app-service/configure-authentication-provider-google)
+    - [Microsoft Account](https://docs.microsoft.com/azure/app-service/configure-authentication-provider-microsoft)
+    - [Azure Active Directory](https://docs.microsoft.com/azure/app-service/configure-authentication-provider-aad)
 
 1. Add the Storage static website **primary endpoint** to the list of allowed external redirect URLs.
     ![](media/configure-aad-2.png)
 
 1. Click **Save** and authentication will be configured.
+
+
+### Update the application to use authentication
+
+1. In VS Code, open **content/index.html**.
+
+1. Change the `authProvider` constant to the value corresponding to the authentication provider you selected:
+    - `facebook`
+    - `twitter`
+    - `google`
+    - `microsoftaccount`
+    - `aad` (Azure Active Directory)
+
+1. Save the file.
+
+1. Search for and select the **Azure Storage: Deploy to static website** command.
+
+1. Select the subscription and Storage account.
+
+1. When prompted for a folder, select **browse** and choose the **content** folder containing index.html.
+
+1. A notification should appear that the upload was successful. Click the button to open the app in a browser.
+
+1. The application should now display a login link. After you log in, you'll be able to update prices and add new flights. Changes you make will be reflected in all browsers that have the app open, in real-time.
 
