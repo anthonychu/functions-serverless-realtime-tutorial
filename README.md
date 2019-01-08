@@ -230,9 +230,9 @@ When running and debugging the Azure Functions runtime locally, application sett
     }
     ```
 
-    * Enter the Azure Storage account connection string into a setting named `AzureWebJobsStorage`. Obtain the value from the **Keys** page in the Storage account in the Azure portal; either the primary or secondary connection string can be used. This setting is required by Azure Functions runtime to coordinate executions between multiple function app instances.
-    * Enter the Azure SignalR Service connection string into a setting named `AzureSignalRConnectionString`. Obtain the value from the **Keys** page in the Azure SignalR Service resource in the Azure portal; either the primary or secondary connection string can be used.
-    * Enter the Azure Cosmos DB connection string into a setting named `CosmosDBConnectionString`. Obtain the value from the **Keys** page in the Cosmos DB account in the Azure portal; either the primary or secondary connection string can be used.
+    * Replace `<storage-connection-string>` with the Azure Storage account connection string. Obtain the value from the **Keys** page in the Azure portal for the Storage account you created; either the primary or secondary connection string can be used. This setting is required by Azure Functions runtime to coordinate executions between multiple function app instances.
+    * Replace `<signalr-connection-string>` with the Azure SignalR Service connection string. Obtain the value from the **Keys** page in the Azure SignalR Service resource in the Azure portal; either the primary or secondary connection string can be used.
+    * Replace `<cosmosdb-connection-string>` with the Azure Cosmos DB connection string. Obtain the value from the **Keys** page in the Cosmos DB account in the Azure portal; either the primary or secondary connection string can be used.
     * The `Host` section configures the port and CORS settings for the local Functions host.
 
 1. Save the file.
