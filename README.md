@@ -193,7 +193,7 @@ This tutorial uses Azure Functions bindings to interact with Azure Cosmos DB and
 
 1. Install the Cosmos DB function app extension.
     ```
-    func extensions install -p Microsoft.Azure.WebJobs.Extensions.CosmosDB -v 3.0.2
+    func extensions install -p Microsoft.Azure.WebJobs.Extensions.CosmosDB -v 3.0.3
     ```
 
 1. Install the SignalR Service function app extension.
@@ -324,7 +324,7 @@ The flight application's UI is a simple single page application (SPA) created wi
 
 1. In the **content** folder, create a new file named **index.html**.
 
-1. Copy and paste the content of **[index.html](https://raw.githubusercontent.com/Azure-Samples/functions-serverless-chat-app-tutorial/master/snippets/index.html)**.
+1. Copy and paste the content of **[index.html](https://raw.githubusercontent.com/anthonychu/functions-serverless-realtime-tutorial/master/assets/index.html)**.
 
 1. Save the file.
 
